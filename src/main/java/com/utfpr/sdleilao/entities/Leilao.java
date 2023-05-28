@@ -1,82 +1,62 @@
 package com.utfpr.sdleilao.entities;
 
-import java.util.*;
+public class Leilao {
 
-public class Leilao extends Thread {
-
-    private Integer idLeilao;
-    private Cliente criador;
-    private Produto produto;
-    private Map<String, Cliente> clientes;
-    private ArrayList<Lance> lances;
-
-    private Lance lanceRecebido;
-    private Lance lanceAtual;
-    private final Integer duracao;
-    // func notificar
-    private boolean isActive;
+    private final LeilaoItem leilaoItem;
+    private final Thread thread;
 
 
     public Leilao(Integer idLeilao, Cliente criador, Produto produto, Integer duracao) {
-        this.idLeilao = idLeilao;
-        this.criador = criador;
-        this.produto = produto;
-        this.clientes = new HashMap<>();
-        this.lances = new ArrayList<>();
-        this.lanceRecebido = null;
-        this.lanceAtual = new Lance(null, produto.getPrecoMinimo());
-        this.duracao = duracao;
-        this.clientes.put(criador.getNome(), criador);
-        this.isActive = true;
+        this.leilaoItem = new LeilaoItem(idLeilao, criador, produto, duracao);
+        this.thread = new Thread(this::run);
     }
 
     public Leilao() {
-        this.idLeilao = -1;
-        this.criador = null;
-        this.produto = null;
-        this.clientes = null;
-        this.lances = null;
-        this.lanceRecebido = null;
-        this.lanceAtual = null;
-        this.duracao = -1;
-        this.isActive = false;
+        this.leilaoItem = new LeilaoItem(-1, null, null, -1);
+        this.thread = new Thread(this::run);
     }
 
     public void iniciarLeilao() {
-        this.start();
+        this.thread.start();
     }
 
     public void run() {
         long inicio = System.currentTimeMillis();
+        Integer duracao = this.leilaoItem.getDuracao() * 1000;
         long atual = 0;
         do {
-            if (this.lanceRecebido != null) {
-                this.lances.add(this.lanceRecebido);
-                this.lanceAtual = this.lanceRecebido;
-                this.lanceRecebido = null;
+            Lance lanceRecebido = this.leilaoItem.getLanceRecebido();
+            if (lanceRecebido != null) {
+                leilaoItem.addLance(lanceRecebido);
+                this.leilaoItem.setLanceAtual(lanceRecebido);
+                this.leilaoItem.setLanceRecebido(null);
+                System.out.println("Lance recebido! Registrado lance no valor de R$" + this.leilaoItem.getLanceAtual().getValor());
+                System.out.println("Lance recebido: " + this.leilaoItem.getLanceRecebido());
             }
             atual = System.currentTimeMillis();
-        } while (atual - inicio < this.duracao);
-        this.isActive = false;
+        } while (atual - inicio < duracao);
+        leilaoItem.setActive(false);
     }
 
     public boolean darLance(Lance lance) {
-        if (!this.isActive) {
+        if (!leilaoItem.isActive()) {
             return false;
         }
-        if (lance.getValor() <= this.lanceAtual.getValor()) {
+        if (lance.getValor() <= leilaoItem.getLanceAtual().getValor()) {
             return false;
         }
 
         Cliente cliente = lance.getCliente();
-        Cliente clienteRegistrado = this.clientes.get(cliente.getNome());
+        Cliente isClienteRegistrado = leilaoItem.searchCliente(cliente.getNome());
 
-        if (clienteRegistrado != null) {
-            this.clientes.put(cliente.getNome(), cliente);
+        if (isClienteRegistrado != null) {
+            this.leilaoItem.addCliente(cliente);
         }
-        this.lances.add(lance);
-        this.lanceRecebido = lance;
+        this.leilaoItem.setLanceRecebido(lance);
         return true;
     }
 
+    public LeilaoItem getLeilaoItem() {
+        return this.leilaoItem;
+    }
 }

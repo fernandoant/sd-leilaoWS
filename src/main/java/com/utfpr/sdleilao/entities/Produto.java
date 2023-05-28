@@ -41,7 +41,7 @@ public class Produto {
         return "Produto {" +
                 "nome = '" + nome + '\'' +
                 ", descricao = '" + descricao + '\'' +
-                ", preco = " + precoMinimo +
+                ", precoMinimo = " + precoMinimo +
                 '}';
     }
 }

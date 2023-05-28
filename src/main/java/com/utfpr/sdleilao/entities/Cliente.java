@@ -1,8 +1,12 @@
 package com.utfpr.sdleilao.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Cliente {
 
+    @JsonProperty
     private Integer id;
+    @JsonProperty
     private String nome;
 
     public Cliente(String nome) {
@@ -19,6 +23,10 @@ public class Cliente {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public void setIdCliente(Integer idCliente) {
+        this.id = idCliente;
     }
 
     @Override
