@@ -29,4 +29,13 @@ public class DadosLeilao {
     public Integer getDuracao() {
         return duracao;
     }
+
+    @Override
+    public String toString() {
+        return "DadosLeilao { " +
+                "criador = " + criador +
+                ", produto = " + produto +
+                ", duracao = " + duracao +
+                " }";
+    }
 }

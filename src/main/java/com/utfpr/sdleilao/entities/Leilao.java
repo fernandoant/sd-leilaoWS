@@ -24,17 +24,23 @@ public class Leilao {
         long inicio = System.currentTimeMillis();
         Integer duracao = this.leilaoItem.getDuracao() * 1000;
         long atual = 0;
-        do {
-            Lance lanceRecebido = this.leilaoItem.getLanceRecebido();
-            if (lanceRecebido != null) {
-                leilaoItem.addLance(lanceRecebido);
-                this.leilaoItem.setLanceAtual(lanceRecebido);
-                this.leilaoItem.setLanceRecebido(null);
-                System.out.println("Lance recebido! Registrado lance no valor de R$" + this.leilaoItem.getLanceAtual().getValor());
-                System.out.println("Lance recebido: " + this.leilaoItem.getLanceRecebido());
-            }
-            atual = System.currentTimeMillis();
-        } while (atual - inicio < duracao);
+        try {
+            do {
+                Thread.sleep(1000);
+                Lance lanceRecebido = this.leilaoItem.getLanceRecebido();
+                if (lanceRecebido != null) {
+                    leilaoItem.addLance(lanceRecebido);
+                    this.leilaoItem.setLanceAtual(lanceRecebido);
+                    this.leilaoItem.setLanceRecebido(null);
+                    System.out.println("Lance recebido! Registrado lance no valor de R$" + this.leilaoItem.getLanceAtual().getValor());
+                    System.out.println("Lance recebido: " + this.leilaoItem.getLanceRecebido());
+                }
+                atual = System.currentTimeMillis();
+            } while (atual - inicio < duracao);
+        }
+        catch(InterruptedException e) {
+            e.printStackTrace();
+        }
         leilaoItem.setActive(false);
     }
 
