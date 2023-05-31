@@ -16,7 +16,7 @@ public class LeilaoItem {
 
     @JsonIgnore
     private Lance lanceRecebido;
-    @JsonIgnore
+
     private Lance lanceAtual;
     private boolean isActive;
 

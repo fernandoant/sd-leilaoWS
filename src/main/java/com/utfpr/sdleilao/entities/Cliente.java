@@ -14,18 +14,17 @@ public class Cliente {
     private Integer id;
     @JsonProperty
     private String nome;
+
     @JsonIgnore
-    private SseEmitter emissor = null;
-    @JsonIgnore
-    private final SseWebMvcController sseController;
+    private SseEmitter emissor;
 
     public Cliente(String nome) {
-        sseController = new SseWebMvcController();
+        this.emissor = null;
         this.nome = nome;
     }
 
     public Cliente() {
-        sseController = new SseWebMvcController();
+        this.emissor = null;
         this.nome = null;
     }
 
@@ -37,16 +36,20 @@ public class Cliente {
         this.nome = nome;
     }
 
-    public void setIdCliente(Integer idCliente) {
-        this.id = idCliente;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public SseEmitter getEmissor() { return emissor; }
+    public Integer getId() {
+        return this.id;
+    }
 
-    public void setEmissor(SseEmitter emissor) {this.emissor = emissor; }
+    public SseEmitter getEmissor() {
+        return emissor;
+    }
 
-    public void sendEvents(String evento, Object msg){
-        sseController.sendEvents(this,evento,msg);
+    public void setEmissor(SseEmitter emissor) {
+        this.emissor = emissor;
     }
 
     @Override

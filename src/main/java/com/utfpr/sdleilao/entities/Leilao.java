@@ -1,5 +1,10 @@
 package com.utfpr.sdleilao.entities;
 
+import com.utfpr.sdleilao.services.Servidor;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class Leilao {
 
     private final LeilaoItem leilaoItem;
@@ -42,6 +47,9 @@ public class Leilao {
             e.printStackTrace();
         }
         leilaoItem.setActive(false);
+        Collection<Cliente> clientes = getLeilaoItem().getClientes().values();
+        Servidor.sendEvent(clientes, "newLance", leilaoItem);
+
     }
 
     public boolean darLance(Lance lance) {
@@ -59,6 +67,11 @@ public class Leilao {
             this.leilaoItem.addCliente(cliente);
         }
         this.leilaoItem.setLanceRecebido(lance);
+
+        Collection<Cliente> clientes = getLeilaoItem().getClientes().values();
+
+        Servidor.sendEvent(clientes, "newLance", lance);
+
         return true;
     }
 

@@ -6,16 +6,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
-@CrossOrigin(origins = "*")
+
+@CrossOrigin("*")
 @RestController
 public class SseWebMvcController {
+
     private static HashMap<String, SseEmitter> emissores = new HashMap<String, SseEmitter>();
+
     @GetMapping(path="/sse/{prefix}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter createConnection(@PathVariable String prefix){
+    public SseEmitter createConnection(@PathVariable String prefix) throws Exception{
         SseEmitter newEmitter = new SseEmitter(-1L);
         emissores.put(prefix,newEmitter);
-        System.out.println(newEmitter);
-        System.out.println(prefix);
         return newEmitter;
     }
 
@@ -33,15 +34,16 @@ public class SseWebMvcController {
         }
         return emissorCadastrado;
     }
-    public void sendEvents(Cliente cliente, String evento, Object msg){
-        SseEmitter emissor = cliente.getEmissor();
+    public static void sendEvents(Cliente cliente, String evento, Object msg){
+        // SseEmitter emissor = cliente.getEmissor();
+        SseEmitter emissor = emissores.get(cliente.getNome());
         if(emissor == null) return;
         SseEmitter.SseEventBuilder objEvento;
         if(evento.equals("criarLeilao"))
         {
             objEvento = event().name(evento).data(msg,MediaType.APPLICATION_JSON);
         } else {
-            objEvento = event().name(evento).data(msg);
+            objEvento = event().name(evento).data(msg, MediaType.APPLICATION_JSON);
         }
 
         try {

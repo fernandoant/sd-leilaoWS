@@ -8,6 +8,7 @@ import com.utfpr.sdleilao.resource.SseWebMvcController;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 @Service
@@ -16,24 +17,20 @@ public class Servidor {
     private final HashMap<String, Cliente> clientes;
     private final ArrayList<Leilao> leiloes;
 
-    private final SseWebMvcController emissores;
     public Servidor() {
         clientes = new HashMap<>();
         leiloes = new ArrayList<>();
-        emissores = new SseWebMvcController();
     }
 
     public Cliente cadastrarUsuario(Cliente cliente) {
-        cliente.setIdCliente(this.clientes.size() + 1);
-        this.clientes.putIfAbsent(cliente.getNome(), cliente);
-        // return this.clientes.get(cliente.getNome()) != null;
+        cliente.setId(this.clientes.size() + 1);
+
         if (this.clientes.get(cliente.getNome()) != null) {
-            if(emissores.getEmitter(cliente))
-            {
-                return cliente;
-            }
+            return null;
         }
-        return null;
+
+        this.clientes.put(cliente.getNome(), cliente);
+        return cliente;
     }
 
     public ArrayList<Leilao> listarLeiloes() {
@@ -53,6 +50,9 @@ public class Servidor {
         Leilao leilao = new Leilao(idLeilao, criador, produto, duracao);
         leilao.iniciarLeilao();
         this.leiloes.add(leilao);
+
+        sendEvent(this.clientes.values(), "newLeilao", leilao);
+
         return leilao;
     }
 
@@ -67,7 +67,14 @@ public class Servidor {
         }
 
         Leilao leilao = this.leiloes.get(idLeilao - 1);
+
         return leilao.darLance(lance);
+    }
+
+    public static void sendEvent(Collection<Cliente> clientes, String event, Object msg) {
+        for (Cliente cliente: clientes) {
+            SseWebMvcController.sendEvents(cliente, event, msg);
+        }
     }
 
 }

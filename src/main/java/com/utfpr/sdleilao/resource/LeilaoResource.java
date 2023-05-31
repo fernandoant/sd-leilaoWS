@@ -5,10 +5,13 @@ import com.utfpr.sdleilao.services.Servidor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 
 import static org.springframework.http.codec.ServerSentEvent.builder;
+import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 /*
     /leilao -> POST = Criar Leilão, GET = Listar Leilões
@@ -18,7 +21,12 @@ import static org.springframework.http.codec.ServerSentEvent.builder;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(
+        consumes = {MediaType.APPLICATION_JSON_VALUE,
+                MediaType.TEXT_EVENT_STREAM_VALUE},
+        produces = {MediaType.APPLICATION_JSON_VALUE,
+                MediaType.TEXT_EVENT_STREAM_VALUE}
+)
 public class LeilaoResource {
 
     private final Servidor servidor;
@@ -93,23 +101,44 @@ public class LeilaoResource {
     }
 
     /*
-    @GetMapping(path="/stream-flux", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> streamFlux() {
-        return Flux.interval(Duration.ofSeconds(1))
-                .map(sequence -> "Flux - " + LocalTime.now().toString());
-    }
+    public static void sendEvents(Cliente cliente, String evento, Object msg){
+        SseEmitter emissor = cliente.getEmissor();
 
-    @GetMapping(path="/stream-sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> streamEvents() {
-        return Flux.interval(Duration.ofSeconds(1))
-                .map(sequence -> ServerSentEvent.<String>builder()
-                        .id(String.valueOf(sequence))
-                        .event("periodic-event")
-                        .data("SSE - " + LocalTime.now().toString())
-                        .build());
-    }
+        if(emissor == null) {
+            return;
+        }
 
-     */
+        SseEmitter.SseEventBuilder objEvento;
+        objEvento = event().name(evento).data(msg);
+
+        if(evento.equals("criarLeilao"))
+        {
+            objEvento = event().name(evento).data(msg,MediaType.APPLICATION_JSON);
+        } else {
+            objEvento = event().name(evento).data(msg);
+        }
+
+
+        try {
+            emissor.send(objEvento);
+        }
+        catch(Exception e) {
+            emissor.completeWithError(e);
+            cliente.setEmissor(null);
+            System.out.println("Cliente: " +  cliente.getNome() + " -> Exception: " +  e);
+        }
+    }
+    */
+
+    /*
+    @CrossOrigin(origins = "*")
+    @GetMapping(path="/sse/")
+    public SseEmitter createConnection() {
+        SseEmitter newEmitter = new SseEmitter(-1L);
+        System.out.println(newEmitter.toString());
+        return newEmitter;
+    }
+    */
 }
 
 class ResponseData<T> {
