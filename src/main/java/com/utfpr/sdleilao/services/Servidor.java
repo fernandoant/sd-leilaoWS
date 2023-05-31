@@ -4,6 +4,7 @@ import com.utfpr.sdleilao.entities.Cliente;
 import com.utfpr.sdleilao.entities.Leilao;
 import com.utfpr.sdleilao.entities.Produto;
 import com.utfpr.sdleilao.entities.Lance;
+import com.utfpr.sdleilao.resource.SseWebMvcController;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,9 +16,11 @@ public class Servidor {
     private final HashMap<String, Cliente> clientes;
     private final ArrayList<Leilao> leiloes;
 
+    private final SseWebMvcController emissores;
     public Servidor() {
         clientes = new HashMap<>();
         leiloes = new ArrayList<>();
+        emissores = new SseWebMvcController();
     }
 
     public Cliente cadastrarUsuario(Cliente cliente) {
@@ -25,7 +28,10 @@ public class Servidor {
         this.clientes.putIfAbsent(cliente.getNome(), cliente);
         // return this.clientes.get(cliente.getNome()) != null;
         if (this.clientes.get(cliente.getNome()) != null) {
-            return cliente;
+            if(emissores.getEmitter(cliente))
+            {
+                return cliente;
+            }
         }
         return null;
     }

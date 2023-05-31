@@ -16,7 +16,7 @@ import static org.springframework.http.codec.ServerSentEvent.builder;
     /cliente -> POST = Cadastrar cliente
 */
 
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class LeilaoResource {
