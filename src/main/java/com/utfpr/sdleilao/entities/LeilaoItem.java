@@ -26,7 +26,7 @@ public class LeilaoItem {
         this.clientes = new HashMap<>();
         this.lances = new ArrayList<>();
         this.lanceRecebido = null;
-        this.lanceAtual = new Lance(null, produto.getPrecoMinimo());
+        this.lanceAtual = new Lance(null, idLeilao, produto.getPrecoMinimo());
         this.clientes.put(criador.getNome(), criador);
         this.isActive = true;
     }

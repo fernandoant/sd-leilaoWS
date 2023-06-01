@@ -7,10 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 
-import static org.springframework.http.codec.ServerSentEvent.builder;
 import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 /*
@@ -21,12 +19,6 @@ import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.e
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping(
-        consumes = {MediaType.APPLICATION_JSON_VALUE,
-                MediaType.TEXT_EVENT_STREAM_VALUE},
-        produces = {MediaType.APPLICATION_JSON_VALUE,
-                MediaType.TEXT_EVENT_STREAM_VALUE}
-)
 public class LeilaoResource {
 
     private final Servidor servidor;
@@ -66,7 +58,7 @@ public class LeilaoResource {
         System.out.println("idLeilao: " + idLeilao);
         System.out.println("Lance: " + lance);
 
-        boolean result = servidor.darLance(idLeilao, lance);
+        boolean result = servidor.darLance(lance);
         if (result) {
             return ResponseEntity.ok().body(lance);
         }
@@ -100,45 +92,33 @@ public class LeilaoResource {
         }
     }
 
-    /*
-    public static void sendEvents(Cliente cliente, String evento, Object msg){
-        SseEmitter emissor = cliente.getEmissor();
+    @GetMapping(path="/sse/{clientName}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter createConnection(@PathVariable String clientName) throws Exception{
+        System.out.println("Requisição Recebida: Criar Conexão - " + clientName);
+        SseEmitter connection = new SseEmitter(-1L);
+        servidor.createConnection(clientName, connection);
+        return connection;
+    }
 
-        if(emissor == null) {
+    public static void sendEvents(Cliente cliente, String evento, Object msg){
+        SseEmitter connection = cliente.getConnection();
+
+        if(connection == null) {
             return;
         }
 
         SseEmitter.SseEventBuilder objEvento;
-        objEvento = event().name(evento).data(msg);
-
-        if(evento.equals("criarLeilao"))
-        {
-            objEvento = event().name(evento).data(msg,MediaType.APPLICATION_JSON);
-        } else {
-            objEvento = event().name(evento).data(msg);
-        }
-
+        objEvento = event().name(evento).data(msg, MediaType.APPLICATION_JSON);
 
         try {
-            emissor.send(objEvento);
+            connection.send(objEvento);
         }
         catch(Exception e) {
-            emissor.completeWithError(e);
-            cliente.setEmissor(null);
-            System.out.println("Cliente: " +  cliente.getNome() + " -> Exception: " +  e);
+            cliente.setConnection(null);
+            connection.completeWithError(e);
+            System.out.println("Exception! Connection: " +  cliente.getNome() + " -> Exception: " +  e);
         }
     }
-    */
-
-    /*
-    @CrossOrigin(origins = "*")
-    @GetMapping(path="/sse/")
-    public SseEmitter createConnection() {
-        SseEmitter newEmitter = new SseEmitter(-1L);
-        System.out.println(newEmitter.toString());
-        return newEmitter;
-    }
-    */
 }
 
 class ResponseData<T> {

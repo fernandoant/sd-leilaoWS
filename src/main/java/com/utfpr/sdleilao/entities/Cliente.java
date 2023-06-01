@@ -2,11 +2,7 @@ package com.utfpr.sdleilao.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.utfpr.sdleilao.resource.SseWebMvcController;
-import org.springframework.http.MediaType;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 public class Cliente {
 
@@ -16,15 +12,15 @@ public class Cliente {
     private String nome;
 
     @JsonIgnore
-    private SseEmitter emissor;
+    private SseEmitter connection;
 
     public Cliente(String nome) {
-        this.emissor = null;
+        this.connection = null;
         this.nome = nome;
     }
 
     public Cliente() {
-        this.emissor = null;
+        this.connection = null;
         this.nome = null;
     }
 
@@ -44,12 +40,12 @@ public class Cliente {
         return this.id;
     }
 
-    public SseEmitter getEmissor() {
-        return emissor;
+    public SseEmitter getConnection() {
+        return this.connection;
     }
 
-    public void setEmissor(SseEmitter emissor) {
-        this.emissor = emissor;
+    public void setConnection(SseEmitter connection) {
+        this.connection = connection;
     }
 
     @Override

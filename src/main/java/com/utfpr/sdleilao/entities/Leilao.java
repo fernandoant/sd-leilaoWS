@@ -1,8 +1,6 @@
 package com.utfpr.sdleilao.entities;
 
 import com.utfpr.sdleilao.services.Servidor;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class Leilao {
@@ -38,7 +36,6 @@ public class Leilao {
                     this.leilaoItem.setLanceAtual(lanceRecebido);
                     this.leilaoItem.setLanceRecebido(null);
                     System.out.println("Lance recebido! Registrado lance no valor de R$" + this.leilaoItem.getLanceAtual().getValor());
-                    System.out.println("Lance recebido: " + this.leilaoItem.getLanceRecebido());
                 }
                 atual = System.currentTimeMillis();
             } while (atual - inicio < duracao);
@@ -48,12 +45,12 @@ public class Leilao {
         }
         leilaoItem.setActive(false);
         Collection<Cliente> clientes = getLeilaoItem().getClientes().values();
-        Servidor.sendEvent(clientes, "newLance", leilaoItem);
-
+        Servidor.sendEvent(clientes, "notifyEndLeilao", leilaoItem);
     }
 
     public boolean darLance(Lance lance) {
         if (!leilaoItem.isActive()) {
+            System.out.println("darLance: leilão inativo");
             return false;
         }
         if (lance.getValor() <= leilaoItem.getLanceAtual().getValor()) {
@@ -70,7 +67,7 @@ public class Leilao {
 
         Collection<Cliente> clientes = getLeilaoItem().getClientes().values();
 
-        Servidor.sendEvent(clientes, "newLance", lance);
+        Servidor.sendEvent(clientes, "notifyNewLance", lance);
 
         return true;
     }

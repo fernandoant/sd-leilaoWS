@@ -4,8 +4,9 @@ import com.utfpr.sdleilao.entities.Cliente;
 import com.utfpr.sdleilao.entities.Leilao;
 import com.utfpr.sdleilao.entities.Produto;
 import com.utfpr.sdleilao.entities.Lance;
-import com.utfpr.sdleilao.resource.SseWebMvcController;
+import com.utfpr.sdleilao.resource.LeilaoResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,8 +57,8 @@ public class Servidor {
         return leilao;
     }
 
-    public boolean darLance(Integer idLeilao, Lance lance) {
-        if (idLeilao <= 0 || idLeilao > this.leiloes.size()) {
+    public boolean darLance(Lance lance) {
+        if (lance.getIdLeilao() <= 0 || lance.getIdLeilao() > this.leiloes.size()) {
             return false;
         }
         String nomeCliente = lance.getCliente().getNome();
@@ -66,14 +67,28 @@ public class Servidor {
             return false;
         }
 
-        Leilao leilao = this.leiloes.get(idLeilao - 1);
+        Leilao leilao = this.leiloes.get(lance.getIdLeilao() - 1);
 
-        return leilao.darLance(lance);
+        boolean result = leilao.darLance(lance);
+
+        if (result) {
+            sendEvent(this.clientes.values(), "newLance", lance);
+        }
+
+        return result;
+    }
+
+    public void createConnection(String clientName, SseEmitter connection) {
+        Cliente cliente = this.clientes.get(clientName);
+        if (cliente == null) {
+            System.out.println("Create Connection: Cliente não cadastrado");
+        }
+        cliente.setConnection(connection);
     }
 
     public static void sendEvent(Collection<Cliente> clientes, String event, Object msg) {
         for (Cliente cliente: clientes) {
-            SseWebMvcController.sendEvents(cliente, event, msg);
+            LeilaoResource.sendEvents(cliente, event, msg);
         }
     }
 
